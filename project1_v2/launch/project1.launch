@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="project1" type="velocities" name="velocities_calculator" output="screen"/>
+
+</launch>
