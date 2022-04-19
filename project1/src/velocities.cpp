@@ -51,6 +51,8 @@ public:
       this->v[1] = (this->r * ((float) (- wRuota[0] + wRuota[1] + wRuota[2] - wRuota[3]))) / 4.0;
       this->v[2] = 0.0;
       
+
+
       // Calculate the angular velocity w [rad/s]
       this->w[0] = 0.0;
       this->w[1] = 0.0;

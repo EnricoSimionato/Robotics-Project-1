@@ -1,13 +1,19 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/TransformStamped.h"
+#include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <cmath>
 #define M_PI 3.14159265358979323846
 
 class OdometryCalculator {
 public:
   OdometryCalculator() { 
     this->velocitiesSubcriber = n.subscribe("cmd_vel", 1000, &OdometryCalculator::computeOdometryCallback, this); // mettere lo / in wheel_states?
+    this->positionSubscriber = n.subscribe("robot/pose", 1000, &OdometryCalculator::initializePoseCallback, this);
     this->odometryPublisher = n.advertise<nav_msgs::Odometry>("odom", 1000);
   }
 
@@ -15,21 +21,46 @@ public:
     ros::spin();
   }
 
-  void computeOdometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
-    if(!this->firstUse) {
-      this->times[0] = (msg->header).stamp.sec;
-      this->times[1] = (msg->header).stamp.nsec;
-      this->firstUse = true;
-      for(int i = 0; i < 3; i++)
-        this->pose[i] = 0.0;
-    } else {
-      this->pose[0] = this->pose[0] + (msg->twist).linear.x * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-      this->pose[1] = this->pose[1] + (msg->twist).linear.y * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-      this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+  void initializePoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+      if(!this->firstUse) {
+        this->times[0] = (msg->header).stamp.sec;
+        this->times[1] = (msg->header).stamp.nsec;
 
-      ROS_INFO("position in x: %f", this->pose[0]);
-      ROS_INFO("position in y: %f", this->pose[1]);
-      ROS_INFO("orientation: %f", this->pose[2]);
+        this->pose[0] = msg->pose.position.x;
+        this->pose[1] = msg->pose.position.y;
+        this->initialPose[0] = msg->pose.position.x;
+        this->initialPose[1] = msg->pose.position.y;
+
+        tf2::Quaternion q(msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w);
+        double roll, pitch, yaw;
+        tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+
+     
+
+        this->pose[2] = yaw;
+        this->initialPose[2] = yaw;
+        /*
+        ROS_INFO("position in x: %f", this->pose[0]);
+        ROS_INFO("position in y: %f", this->pose[1]);
+        ROS_INFO("orientation: %f", this->pose[2]);
+        */
+
+        this->firstUse = true;
+      }
+  }
+
+
+  void computeOdometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
+      this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+      float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
+
+      this->pose[0] = this->pose[0] + v * cos(this->pose[2]) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+      this->pose[1] = this->pose[1] + v * sin(this->pose[2]) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+     // this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+
+      //ROS_INFO("position in x: %f", this->pose[0]);
+      //ROS_INFO("position in y: %f", this->pose[1]);
+      //ROS_INFO("orientation: %f", this->pose[2]);
 
       this->times[0] = (msg->header).stamp.sec;
       this->times[1] = (msg->header).stamp.nsec;
@@ -60,18 +91,59 @@ public:
       // time
       odometryMessage.header.stamp.sec = this->times[0];
       odometryMessage.header.stamp.nsec = this->times[1];
+      odometryMessage.header.frame_id = "world"; 
+      odometryMessage.child_frame_id = "base_link"; 
+      odometryPublisher.publish(odometryMessage);   
 
-      odometryPublisher.publish(odometryMessage);
-    }
+
+
+      transformStamped.header.frame_id = "world"; 
+      transformStamped.child_frame_id = "odom"; 
+ 
+      transformStamped.transform.translation.x = this->initialPose[0];
+      transformStamped.transform.translation.y = this->initialPose[1];
+      transformStamped.transform.translation.z = 0.0;
+    
+      tf2::Quaternion q1; 
+      q1.setRPY(0, 0, this->initialPose[2]);
+      transformStamped.transform.rotation.x = q1.x();
+      transformStamped.transform.rotation.y = q1.y();
+      transformStamped.transform.rotation.z = q1.z();
+      transformStamped.transform.rotation.w = q1.w();
+
+      br.sendTransform(transformStamped);
+
+
+      transformStamped.header.frame_id = "odom"; 
+      transformStamped.child_frame_id = "base_link"; 
+ 
+      transformStamped.transform.translation.x = this->pose[0] - this->initialPose[0];
+      transformStamped.transform.translation.y = this->pose[1] - this->initialPose[1];
+      transformStamped.transform.translation.z = 0.0;
+     
+      q1.setRPY(0, 0, this->pose[2] - this->initialPose[2]);
+      transformStamped.transform.rotation.x = q1.x();
+      transformStamped.transform.rotation.y = q1.y();
+      transformStamped.transform.rotation.z = q1.z();
+      transformStamped.transform.rotation.w = q1.w();
+
+      br.sendTransform(transformStamped);
+
+      
+      
   }
 
 private:
   ros::NodeHandle n; 
   ros::Subscriber velocitiesSubcriber;
+  ros::Subscriber positionSubscriber;
   ros::Publisher odometryPublisher;
+  tf2_ros::TransformBroadcaster br;
+  geometry_msgs::TransformStamped transformStamped;
   bool firstUse = false;
   int times[2];
   float pose[3];
+  float initialPose[3];
 };
 
 int main(int argc, char **argv) {
