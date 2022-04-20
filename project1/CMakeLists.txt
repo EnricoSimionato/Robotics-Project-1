@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(project1)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros cmath)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros)
 
 ## Add custom message and services and their dependencies
 
