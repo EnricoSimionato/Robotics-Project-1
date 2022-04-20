@@ -2,13 +2,21 @@ cmake_minimum_required(VERSION 2.8.3)
 project(project1)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros message_generation)
 
 ## Add custom message and services and their dependencies
+add_message_files(
+  FILES
+  wheels_rpm.msg
+ )
 
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ## Declare a catkin package
-catkin_package()
+catkin_package(CATKIN_DEPENDS message_runtime)
 
 ## Build talker and listener
 
@@ -22,4 +30,7 @@ add_executable(odometry src/odometry.cpp)
 
 target_link_libraries(odometry ${catkin_LIBRARIES})
 
+add_executable(control src/control.cpp)
+
+target_link_libraries(control ${catkin_LIBRARIES})
 ##target_link_libraries(project1 PRIVATE m)
