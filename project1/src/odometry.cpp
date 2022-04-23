@@ -51,30 +51,36 @@ public:
   }
 
   void computeOdometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
+    float teta;
     this->integrationMode = 1;
+    this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+    float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
+    
+    if ((msg->twist).linear.x == 0.0) 
+        (msg->twist).linear.y >= 0.0 ? teta = M_PI / 2.0 : teta = - M_PI / 2.0;
+      else if ((msg->twist).linear.x > 0.0)
+        teta = atan((msg->twist).linear.y / (msg->twist).linear.x);
+      else teta = atan((msg->twist).linear.y / (msg->twist).linear.x) + M_PI;
+
     if(integrationMode == 0) {
-      this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-      float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
 
-      this->pose[0] = this->pose[0] + v * cos(this->pose[2]) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-      this->pose[1] = this->pose[1] + v * sin(this->pose[2]) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-     // this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-
-      //ROS_INFO("position in x: %f", this->pose[0]);
-      //ROS_INFO("position in y: %f", this->pose[1]);
-      //ROS_INFO("orientation: %f", this->pose[2]);
+      this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+      this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta) * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+      ROS_INFO("position in x: %f", this->pose[0]);
+      ROS_INFO("position in y: %f", this->pose[1]);
+      ROS_INFO("orientation: %f", this->pose[2]);
+    
     } else {
 
-      this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
-      float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
-
       float ts = msg->header.stamp.sec - this->times[0] + (float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0;
-      this->pose[0] = this->pose[0] + v * cos(this->pose[2] + (msg->twist).angular.z * ts / 2) * ts;
-      this->pose[1] = this->pose[1] + v * sin(this->pose[2] + (msg->twist).angular.z * ts / 2) * ts;
-      //ROS_INFO("position in x: %f", this->pose[0]);
-      //ROS_INFO("position in y: %f", this->pose[1]);
-      //ROS_INFO("orientation: %f", this->pose[2]);
+      this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
+      this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
+      ROS_INFO("position in x: %f", this->pose[0]);
+      ROS_INFO("position in y: %f", this->pose[1]);
+      ROS_INFO("orientation: %f", this->pose[2]);
+    
     }
+
       this->times[0] = (msg->header).stamp.sec;
       this->times[1] = (msg->header).stamp.nsec;
       
@@ -140,10 +146,7 @@ public:
       transformStamped.transform.rotation.z = q1.z();
       transformStamped.transform.rotation.w = q1.w();
 
-      br.sendTransform(transformStamped);
-
-      
-      
+      br.sendTransform(transformStamped);   
   }
 
   void setIntegrationMode(int integrationMode) {

@@ -58,7 +58,7 @@ public:
       this->w[1] = 0.0;
       this->w[2] = (this->r * ((float) (- wRuota[0] + wRuota[1] - wRuota[2] + wRuota[3]))) / (4.0 * (this->lX + this->lY));
       
-      ROS_INFO("w ruota 1: %f", wRuota[0]);
+      /*ROS_INFO("w ruota 1: %f", wRuota[0]);
       ROS_INFO("w ruota 2: %f", wRuota[1]);
       ROS_INFO("w ruota 3: %f", wRuota[2]);
       ROS_INFO("w ruota 4: %f", wRuota[3]);
@@ -71,7 +71,7 @@ public:
       //ROS_INFO("w in z: %f", this->w.z);
       ROS_INFO("v in x: %f", this->v[0]);
       ROS_INFO("v in y: %f", this->v[1]);
-      ROS_INFO("w in z: %f", this->w[2]);
+      ROS_INFO("w in z: %f", this->w[2]);*/
       
       // Update ticks and time
       for(int i = 0; i < sizeof(this->ticks)/sizeof(float); i++)
