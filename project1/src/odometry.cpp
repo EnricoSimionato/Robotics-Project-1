@@ -67,17 +67,17 @@ public:
 
       this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta) * ts;
       this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta) * ts;
-      ROS_INFO("position in x: %f", this->pose[0]);
+     /* ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in y: %f", this->pose[1]);
-      ROS_INFO("orientation: %f", this->pose[2]);
+      ROS_INFO("orientation: %f", this->pose[2]);*/
     
     } else {
 
       this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
       this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
-      ROS_INFO("position in x: %f", this->pose[0]);
+      /*ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in y: %f", this->pose[1]);
-      ROS_INFO("orientation: %f", this->pose[2]);
+      ROS_INFO("orientation: %f", this->pose[2]);*/
     
     }
 
