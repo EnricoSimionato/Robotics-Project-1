@@ -17,6 +17,7 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/parameters.cfg 
+  cfgCalibration/parametersCalibration.cfg
 )
 
 ## Declare a catkin package
@@ -36,5 +37,12 @@ target_link_libraries(odometry ${catkin_LIBRARIES})
 
 add_executable(control src/control.cpp)
 
+add_dependencies(control ${catkin_EXPORTED_TARGETS})
+
 target_link_libraries(control ${catkin_LIBRARIES})
+
+add_executable(calibration src/calibration.cpp)
+
+target_link_libraries(calibration ${catkin_LIBRARIES})
+
 ##target_link_libraries(project1 PRIVATE m)
