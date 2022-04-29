@@ -52,7 +52,6 @@ public:
 
   void computeOdometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     float teta;
-    this->integrationMode = 1;
     this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
     float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
     
@@ -67,18 +66,22 @@ public:
 
       this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta) * ts;
       this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta) * ts;
+      ROS_INFO("Euler method");  
+      ROS_INFO("position in x: %f", this->pose[0]);
+      ROS_INFO("position in y: %f", this->pose[1]);
+      ROS_INFO("orientation: %f", this->pose[2]);
+    
+    } else if (this->integrationMode == 1) {
+
+      this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
+      this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
+      ROS_INFO("RK method");
       ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in y: %f", this->pose[1]);
       ROS_INFO("orientation: %f", this->pose[2]);
     
     } else {
-
-      this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
-      this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
-      ROS_INFO("position in x: %f", this->pose[0]);
-      ROS_INFO("position in y: %f", this->pose[1]);
-      ROS_INFO("orientation: %f", this->pose[2]);
-    
+      ROS_INFO("Error");
     }
 
       this->times[0] = (msg->header).stamp.sec;
@@ -149,8 +152,9 @@ public:
       br.sendTransform(transformStamped);   
   }
 
-  void setIntegrationMode(int integrationMode) {
-    this->integrationMode = integrationMode;
+  void setIntegrationMode(int integrationMethod) {
+    this->integrationMode = integrationMethod;
+    ROS_INFO("The integration method is %d", this->integrationMode);
   }
 
 private:
@@ -168,9 +172,9 @@ private:
 };
 
 void integrationMethodCallback(OdometryCalculator *my_odometryCalculator, project1::parametersConfig &config, uint32_t level) {
-  ROS_INFO("The integration method is %d", config.method);
-  if(config.method == 0 || config.method == 1)
+  if(config.method == 0 || config.method == 1) {
     my_odometryCalculator->setIntegrationMode(config.method);
+  }
 }
 
 
