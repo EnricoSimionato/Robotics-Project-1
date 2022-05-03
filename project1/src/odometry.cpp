@@ -13,6 +13,7 @@
 class OdometryCalculator {
 public:
   OdometryCalculator() { 
+    this->service = n.advertiseService<project1::Reset::Request, project1::Reset::Response>("reset", boost::bind(&OdometryCalculator::reset_callback, this, pose, _1, _2));
     this->velocitiesSubcriber = n.subscribe("cmd_vel", 1000, &OdometryCalculator::computeOdometryCallback, this); // mettere lo / in wheel_states?
     this->positionSubscriber = n.subscribe("robot/pose", 1000, &OdometryCalculator::initializePoseCallback, this);
     this->odometryPublisher = n.advertise<nav_msgs::Odometry>("odom", 1000);
@@ -21,6 +22,23 @@ public:
   void main_loop() {
     ros::spin();
   }
+
+  bool reset_callback(float *pose, project1::Reset::Request  &req, project1::Reset::Response &res) {
+    res.old_x = pose[0];
+    res.old_y = pose[1];
+    res.old_theta = pose[2];
+    pose[0] = req.new_x;
+    pose[1] = req.new_y;
+    pose[2] = req.new_theta;
+    ROS_INFO("Request to reset x to %f - Responding with old x: %f", 
+        (float)req.new_x, (float)res.old_x);
+    ROS_INFO("Request to reset y to %f - Responding with old y: %f", 
+        (float)req.new_x, (float)res.old_y);
+    ROS_INFO("Request to reset theta to %f - Responding with old theta: %f", 
+        (float)req.new_x, (float)res.old_theta);
+    return true;
+  }
+
 
   void initializePoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
       if(!this->firstUse) {
@@ -158,6 +176,7 @@ private:
   ros::Subscriber velocitiesSubcriber;
   ros::Subscriber positionSubscriber;
   ros::Publisher odometryPublisher;
+  ros::ServiceServer service;
   tf2_ros::TransformBroadcaster br;
   geometry_msgs::TransformStamped transformStamped;
   bool firstUse = false;
