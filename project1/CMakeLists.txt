@@ -10,6 +10,11 @@ add_message_files(
   wheels_rpm.msg
  )
 
+add_service_files(
+  FILES
+  Reset.srv
+)
+
 generate_messages(
    DEPENDENCIES
    std_msgs
@@ -28,21 +33,22 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(velocities src/velocities.cpp)
-
+add_dependencies(velocities ${catkin_EXPORTED_TARGETS})
 target_link_libraries(velocities ${catkin_LIBRARIES})
 
 add_executable(odometry src/odometry.cpp)
-
+add_dependencies(odometry ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry ${catkin_LIBRARIES})
 
 add_executable(control src/control.cpp)
-
 add_dependencies(control ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(control ${catkin_LIBRARIES})
 
-add_executable(calibration src/calibration.cpp)
+add_executable(reset_client src/client.cpp)
+add_dependencies(reset_client ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reset_client ${catkin_LIBRARIES})
 
+add_executable(calibration src/calibration.cpp)
 target_link_libraries(calibration ${catkin_LIBRARIES})
 
 ##target_link_libraries(project1 PRIVATE m)
