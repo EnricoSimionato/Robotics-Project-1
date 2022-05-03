@@ -1,0 +1,7 @@
+float new_x
+float new_y
+float new_theta
+---
+float old_x
+float old_y
+float old_theta
