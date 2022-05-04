@@ -1,23 +1,54 @@
 import os
+import numpy as np
+import time
+import sys
 
-########################################
-#       Da mettere in ~/robotics       #
-########################################
+#per il movimento lineare basta r e n
 
+minValue = 1000000.0
+counter = 0
+first = True
+os.system("gnome-terminal -e 'bash -c \" catkin_make; roslaunch project1 project1.launch\"'")
+for r in np.arange(0.073,0.08,0.001):
+	for n in np.arange(41,45,1):
+		if first:
+			first = False
+			time.sleep(7)
+			os.system("gnome-terminal -e 'bash -c \"rostopic echo /calibration > distances.txt\"'")
+		parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(n)
+		parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(r)
+		os.system("gnome-terminal -e 'bash -c \"" + parameter1 + "\"'")
+		os.system("gnome-terminal -e 'bash -c \"" + parameter2 + "\"'")
+		time.sleep(1)
+		os.system("gnome-terminal -e 'bash -c \"cd bags/; rosbag play -s 1 -u 30 bag1.bag\"'")		
+		print(str(counter) + "\n")
+		counter = counter + 1				
+		time.sleep(30)
 
-minValue = -1
-for r in range(1,2,1):
-	for n in range(1,2,1):
-		for w in range(1,2,1):
-			for l in range(1,2,1):
-				os.system("gnome-terminal -e 'bash -c \"rosparam set /odometry_calculator/method RK; catkin_make; cd src/Robotics-Project-1; roslaunch project1 project1.launch; exec bash\"'")
-				os.system("gnome-terminal -e 'bash -c \"cd src/Robotics-Project-1/bags/; rosbag play bag1.bag; exec bash\"'")
-				# Potremmo scrivere su un file e poi leggere e parsare
-				# Usare a metrica appropriata e fare il calcolo
-				# Trovare un modo per killare i processi
-				actualValue = 0
-				if(minValue == -1):
-					minValue = 0; # Valore restituito
-				else:
-					if(actualValue < minValue):
-						parameters = [r, n, w, l]
+parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(n)
+parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(r)
+os.system("gnome-terminal -e 'bash -c \"" + parameter1 + "\"'")
+os.system("gnome-terminal -e 'bash -c \"" + parameter2 + "\"'")
+time.sleep(1)
+
+f = open('distances.txt', 'r')
+f.readline()
+f.readline()
+f.readline()
+f.readline()
+for r in np.arange(0.073,0.08,0.001):
+	for n in np.arange(41,45,1):
+		result = f.readline()
+		result1 = result[6:14]
+		try:	
+			res = float(result1)
+			if(res < minValue):
+				minValue = res
+				params = [r, n]
+		except ValueError:
+			print("error"+ str(n) + " " + str(r))
+		f.readline()
+		f.readline()
+		f.readline()
+f.close
+print(str(minValue) + " r: " + str(params[0]) + " n: " + str(params[1]))

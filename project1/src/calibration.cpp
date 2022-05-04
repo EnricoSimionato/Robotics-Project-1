@@ -14,7 +14,6 @@ public:
     this->velocitiesSubscriber = n.subscribe("wheel_states", 1000, &CalibrationCalculator::computeOdometryCallback, this); 
     this->calibrationPublisher = n.advertise<std_msgs::Float32>("calibration", 1000);
     this->poseSubscriber = n.subscribe("robot/pose", 1000, &CalibrationCalculator::computeMetricCallback, this);
-    this->initialPoseSubscriber = n.subscribe("robot/pose", 1000, &CalibrationCalculator::initializePoseCallback, this);
   }
 
   void main_loop() {
@@ -78,8 +77,8 @@ public:
     }
   }
 
-  void initializePoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-      if(!this->firstUsePose) {
+  void computeMetricCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+    if(!this->firstUsePose) {
         this->times[0] = (msg->header).stamp.sec;
         this->times[1] = (msg->header).stamp.nsec;
 
@@ -93,21 +92,18 @@ public:
         this->pose[2] = yaw;
 
         this->firstUsePose = true;
+    }
+    else
+    {
+      float ts = msg->header.stamp.sec - this->times[0] + ((float) (msg->header).stamp.nsec) / 1000000000.0 - ((float) this->times[1]) / 1000000000.0;
+      if (ts < 0.02 && ts > -0.02)
+      {
+        float dist = sqrt((msg->pose.position.x - this->pose[0]) * (msg->pose.position.x - this->pose[0]) + (msg->pose.position.y - this->pose[1]) * (msg->pose.position.y - this->pose[1])); 
+      
+        if (dist < 1000.0)
+          this->distance += dist;
       }
-  }
-
-  void computeMetricCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-    //facendo solo movimenti lineari basta calcolare la distanza in x e y
-    float newPose[2];
-    float ts = msg->header.stamp.sec - this->times[0] + (float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0;
-
-    newPose[0] = this->pose[0] + this->vel * cos(this->pose[2] + this->teta) * ts;
-    newPose[1] = this->pose[1] + this->vel * sin(this->pose[2] + this->teta) * ts;
-    
-    float dist = sqrt((msg->pose.position.x - newPose[0]) * (msg->pose.position.x - newPose[0]) + (msg->pose.position.y - newPose[1]) * (msg->pose.position.y - newPose[1])); 
-    
-    if (dist < 1000.0)
-      this->distance += dist;
+    }
   }
 
   void setParameters(int N, float r, float lX, float lY) {
@@ -122,7 +118,9 @@ public:
     distance.data = this->distance;
     calibrationPublisher.publish(distance);
 
-    this -> distance = 0.0;
+    this->distance = 0.0;
+    this->times[0] = 0;
+    this->times[1] = 0; 
   }
 
 private:
@@ -136,7 +134,7 @@ private:
   float vel;
   float teta;
   float ticks[4];
-  int times[2];
+  int times[2] = {0};
   float v[3];
   float w[3];
   float pose[3];
@@ -150,7 +148,6 @@ private:
 
 void parametersCallback(CalibrationCalculator *my_calibrationCalculator, project1::parametersCalibrationConfig &config, uint32_t level) {
   ROS_INFO("The parameters are %d %f %f %f ", config.N, config.r, config.lX, config.lY);
-  //if(config.method == 0 || config.method == 1)
     my_calibrationCalculator->setParameters(config.N, config.r, config.lX, config.lY);
 }
 
