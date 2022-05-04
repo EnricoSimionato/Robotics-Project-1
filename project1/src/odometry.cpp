@@ -8,6 +8,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <dynamic_reconfigure/server.h>
 #include <project1/parametersConfig.h>
+#include "project1/Reset.h"
 #define M_PI 3.14159265358979323846
 
 class OdometryCalculator {
@@ -24,18 +25,18 @@ public:
   }
 
   bool reset_callback(float *pose, project1::Reset::Request  &req, project1::Reset::Response &res) {
-    res.old_x = pose[0];
-    res.old_y = pose[1];
-    res.old_theta = pose[2];
-    pose[0] = req.new_x;
-    pose[1] = req.new_y;
-    pose[2] = req.new_theta;
+    res.old_x = this->pose[0];
+    res.old_y = this->pose[1];
+    res.old_theta = this->pose[2];
+    this->pose[0] = req.new_x;
+    this->pose[1] = req.new_y;
+    this->pose[2] = req.new_theta;
     ROS_INFO("Request to reset x to %f - Responding with old x: %f", 
         (float)req.new_x, (float)res.old_x);
     ROS_INFO("Request to reset y to %f - Responding with old y: %f", 
-        (float)req.new_x, (float)res.old_y);
+        (float)req.new_y, (float)res.old_y);
     ROS_INFO("Request to reset theta to %f - Responding with old theta: %f", 
-        (float)req.new_x, (float)res.old_theta);
+        (float)req.new_theta, (float)res.old_theta);
     return true;
   }
 
@@ -69,38 +70,40 @@ public:
   }
 
   void computeOdometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
-    float teta;
-    this->pose[2] = this->pose[2] + (msg->twist).angular.z * (msg->header.stamp.sec - this->times[0] + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0));
+    float ts = (msg->header).stamp.sec - this->times[0] + ((float) (msg->header).stamp.nsec) / 1000000000.0 - ((float) this->times[1]) / 1000000000.0;
+
+    this->pose[2] = this->pose[2] + (msg->twist).angular.z * ts;
+
     float v = sqrt((msg->twist).linear.x * (msg->twist).linear.x + (msg->twist).linear.y * (msg->twist).linear.y);
     
+    float teta;
     if ((msg->twist).linear.x == 0.0) 
       (msg->twist).linear.y >= 0.0 ? teta = M_PI / 2.0 : teta = - M_PI / 2.0;
     else if ((msg->twist).linear.x > 0.0)
       teta = atan((msg->twist).linear.y / (msg->twist).linear.x);
     else teta = atan((msg->twist).linear.y / (msg->twist).linear.x) + M_PI;
 
-    float ts = msg->header.stamp.sec - this->times[0] + (float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0;
     if(this->integrationMode == 0) {
 
       this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta) * ts;
       this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta) * ts;
-      ROS_INFO("Euler method");  
+      /*ROS_INFO("Euler method");  
       ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in y: %f", this->pose[1]);
       ROS_INFO("orientation: %f", this->pose[2]);
-    
+    */
     } else if (this->integrationMode == 1) {
 
       this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
       this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
-
+/*
       ROS_INFO("RK method");
       ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in x: %f", this->pose[0]);
       ROS_INFO("position in y: %f", this->pose[1]);
       ROS_INFO("orientation: %f", this->pose[2]);
-    
+  */  
     } else {
       ROS_INFO("Error");
     }

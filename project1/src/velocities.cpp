@@ -37,14 +37,14 @@ public:
     }
     else
     {
-      if(this->counter == 5) {
+      if(this->counter == 3) {
         float wRuota[4];
 
         // Calculate the angular velocity of each wheel [rad/s]
         for(int i = 0; i < sizeof(wRuota)/sizeof(float); i++)
         {
           wRuota[i] = (2.0 * M_PI * (msg->position[i] - this->ticks[i])) / 
-              (this->N * this->T * (((msg->header).stamp.sec - this->times[0]) + ((float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0)));
+              (this->N * this->T * (((msg->header).stamp.sec - this->times[0]) + ((float) (msg->header).stamp.nsec) / 1000000000.0 - ((float) this->times[1]) / 1000000000.0));
         }
 
         // Calculate the linear velocity v [m/s]
@@ -59,14 +59,16 @@ public:
         this->w[1] = 0.0;
         this->w[2] = (this->r * ((float) (- wRuota[0] + wRuota[1] - wRuota[2] + wRuota[3]))) / (4.0 * (this->lX + this->lY));
         
+        
         ROS_INFO("w ruota 1: %f", wRuota[0]);
         ROS_INFO("w ruota 2: %f", wRuota[1]);
         ROS_INFO("w ruota 3: %f", wRuota[2]);
         ROS_INFO("w ruota 4: %f", wRuota[3]);
-        ROS_INFO("w ruota 1 reale: %f", msg->velocity[0] / (60 * this->T)); // in [rad/s]
+        /*ROS_INFO("w ruota 1 reale: %f", msg->velocity[0] / (60 * this->T)); // in [rad/s]
         ROS_INFO("w ruota 2 reale: %f", msg->velocity[1] / (60 * this->T));
         ROS_INFO("w ruota 3 reale: %f", msg->velocity[2] / (60 * this->T));
         ROS_INFO("w ruota 4 reale: %f", msg->velocity[3] / (60 * this->T));
+        */
         /*//ROS_INFO("v in x: %f", this->v.x);
         //ROS_INFO("v in y: %f", this->v.y);
         //ROS_INFO("w in z: %f", this->w.z);
@@ -115,9 +117,9 @@ private:
   float w[3];
   //Vec3 v(0, 0, 0);
   //Vec3 w(0, 0, 0);
-  int N = 42; // encoder resolution
+  int N = 43; // encoder resolution
   int T = 5; // gear ratio
-  float r = 0.07;
+  float r = 0.078;
   float lX = 0.2;
   float lY = 0.169;
   int counter = 0;
