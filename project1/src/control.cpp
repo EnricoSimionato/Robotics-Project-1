@@ -40,7 +40,7 @@ private:
   int T = 5; 
   float r = 0.078;
   float lX = 0.2;
-  float lY = 0.169;
+  float lY = 0.15;
 };
 
 int main(int argc, char **argv) {

@@ -8,7 +8,7 @@ import sys
 minValue = 1000000.0
 counter = 0
 first = True
-os.system("gnome-terminal -e 'bash -c \" catkin_make; roslaunch project1 project1.launch\"'")
+os.system("gnome-terminal -e 'bash -c \"cd ..; cd ..; catkin_make; roslaunch project1 project1.launch\"'")
 for r in np.arange(0.073,0.08,0.001):
 	for n in np.arange(41,45,1):
 		if first:

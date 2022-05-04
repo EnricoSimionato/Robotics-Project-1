@@ -117,11 +117,11 @@ private:
   float w[3];
   //Vec3 v(0, 0, 0);
   //Vec3 w(0, 0, 0);
-  int N = 43; // encoder resolution
+  int N = 44; // encoder resolution
   int T = 5; // gear ratio
   float r = 0.078;
   float lX = 0.2;
-  float lY = 0.169;
+  float lY = 0.15;
   int counter = 0;
 };
 

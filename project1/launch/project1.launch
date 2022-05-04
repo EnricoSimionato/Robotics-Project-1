@@ -1,4 +1,5 @@
 <launch>
+    <param name="x0" value="0"/>
     <node pkg="project1" type="velocities" name="velocities_calculator" output="screen"/>
     <node pkg="project1" type="odometry" name="odometry_calculator" output="screen"/>
     <node pkg="project1" type="control" name="control_calculator" output="screen"/>
