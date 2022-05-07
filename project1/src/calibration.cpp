@@ -35,8 +35,8 @@ public:
     else
     {
       float wRuota[4];
-      float ts = msg->header.stamp.sec - this->times[0] + (float) ((msg->header).stamp.nsec - this->times[1]) / 1000000000.0;
-
+      float ts = (msg->header).stamp.sec - this->times[0] + ((float) (msg->header).stamp.nsec) / 1000000000.0 - ((float) this->times[1]) / 1000000000.0;
+      
       // Calculate the angular velocity of each wheel [rad/s]
       for(int i = 0; i < sizeof(wRuota)/sizeof(float); i++)
       {
