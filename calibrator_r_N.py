@@ -3,27 +3,28 @@ import numpy as np
 import time
 import sys
 
-#per il movimento lineare basta r e n
-
 minValue = 1000000.0
 counter = 0
 first = True
-os.system("gnome-terminal -e 'bash -c \"cd ..; cd ..; catkin_make; roslaunch project1 project1.launch\"'")
+os.system("gnome-terminal -e 'bash -c \" catkin_make; roslaunch project1 project1.launch\"'")
 for r in np.arange(0.073,0.08,0.001):
-	for n in np.arange(41,45,1):
+	for n in np.arange(42,47,1):
 		if first:
 			first = False
 			time.sleep(7)
+			parameter = "rosrun dynamic_reconfigure dynparam set /calibration_calculator bag " + str(0)
+			os.system("gnome-terminal -e 'bash -c \"" + parameter + "\"'")
 			os.system("gnome-terminal -e 'bash -c \"rostopic echo /calibration > distances.txt\"'")
 		parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(n)
 		parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(r)
 		os.system("gnome-terminal -e 'bash -c \"" + parameter1 + "\"'")
 		os.system("gnome-terminal -e 'bash -c \"" + parameter2 + "\"'")
 		time.sleep(1)
-		os.system("gnome-terminal -e 'bash -c \"cd bags/; rosbag play -s 1 -u 30 bag1.bag\"'")		
+		os.system("gnome-terminal -e 'bash -c \"cd bags/; rosbag play bag1.bag\"'")		
 		print(str(counter) + "\n")
 		counter = counter + 1				
-		time.sleep(30)
+		time.sleep(60)
+
 
 parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(n)
 parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(r)
@@ -32,6 +33,8 @@ os.system("gnome-terminal -e 'bash -c \"" + parameter2 + "\"'")
 time.sleep(1)
 
 f = open('distances.txt', 'r')
+f.readline()
+f.readline()
 f.readline()
 f.readline()
 f.readline()

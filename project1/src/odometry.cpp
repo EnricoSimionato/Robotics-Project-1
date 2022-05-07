@@ -178,8 +178,7 @@ public:
 
   void setIntegrationMode(int integrationMethod) {
     this->integrationMode = integrationMethod;
-    ROS_INFO("The integration method is %d", this->integrationMode);
-  }
+   }
 
 private:
   ros::NodeHandle n; 
@@ -197,7 +196,11 @@ private:
 };
 
 void integrationMethodCallback(OdometryCalculator *my_odometryCalculator, project1::parametersConfig &config, uint32_t level) {
-  if(config.method == 0 || config.method == 1) {
+  if(config.method == 0 || config.method == 1)
+  {
+    if (config.method == 0)
+      ROS_INFO("The integration method is Euler");
+    else ROS_INFO("The integration method is Runge-Kutta");
     my_odometryCalculator->setIntegrationMode(config.method);
   }
 }

@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/TwistStamped.h"
-//#include "Vec3.h"
 #define M_PI 3.14159265358979323846
 
 class VelocityCalculator {
@@ -60,10 +59,10 @@ public:
         this->w[2] = (this->r * ((float) (- wRuota[0] + wRuota[1] - wRuota[2] + wRuota[3]))) / (4.0 * (this->lX + this->lY));
         
         
-        ROS_INFO("w ruota 1: %f", wRuota[0]);
+      /*  ROS_INFO("w ruota 1: %f", wRuota[0]);
         ROS_INFO("w ruota 2: %f", wRuota[1]);
         ROS_INFO("w ruota 3: %f", wRuota[2]);
-        ROS_INFO("w ruota 4: %f", wRuota[3]);
+        ROS_INFO("w ruota 4: %f", wRuota[3]);*/
         /*ROS_INFO("w ruota 1 reale: %f", msg->velocity[0] / (60 * this->T)); // in [rad/s]
         ROS_INFO("w ruota 2 reale: %f", msg->velocity[1] / (60 * this->T));
         ROS_INFO("w ruota 3 reale: %f", msg->velocity[2] / (60 * this->T));
@@ -84,8 +83,6 @@ public:
         this->times[1] = (msg->header).stamp.nsec;
 
         geometry_msgs::TwistStamped velocitiesMessage;
-        //velocitiesMessage.twist.linear = this->v;
-        //velocitiesMessage.twist.angular = this->w
         velocitiesMessage.twist.linear.x = this->v[0];
         velocitiesMessage.twist.linear.y = this->v[1];
         velocitiesMessage.twist.linear.z = this->v[2];
@@ -115,8 +112,6 @@ private:
   int times[2];
   float v[3];
   float w[3];
-  //Vec3 v(0, 0, 0);
-  //Vec3 w(0, 0, 0);
   int N = 44; // encoder resolution
   int T = 5; // gear ratio
   float r = 0.078;
