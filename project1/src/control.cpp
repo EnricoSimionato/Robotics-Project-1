@@ -17,10 +17,10 @@ public:
       project1::wheels_rpm controlMessage;
       
       // Calculate the rpm of each wheel
-      controlMessage.rpm_fl = 60 * this->T * ((msg->twist).linear.x - (msg->twist).linear.y - (this->lX + this->lY) * (msg->twist).angular.z) / this->r;
-      controlMessage.rpm_fr = 60 * this->T * ((msg->twist).linear.x + (msg->twist).linear.y + (this->lX + this->lY) * (msg->twist).angular.z) / this->r; 
-      controlMessage.rpm_rr = 60 * this->T * ((msg->twist).linear.x - (msg->twist).linear.y + (this->lX + this->lY) * (msg->twist).angular.z) / this->r; 
-      controlMessage.rpm_rl = 60 * this->T * ((msg->twist).linear.x + (msg->twist).linear.y - (this->lX + this->lY) * (msg->twist).angular.z) / this->r; 
+      controlMessage.rpm_fl = 60 * this->T * ((msg->twist).linear.x - (msg->twist).linear.y - (this->sum_lX_lY) * (msg->twist).angular.z) / this->r;
+      controlMessage.rpm_fr = 60 * this->T * ((msg->twist).linear.x + (msg->twist).linear.y + (this->sum_lX_lY) * (msg->twist).angular.z) / this->r; 
+      controlMessage.rpm_rr = 60 * this->T * ((msg->twist).linear.x - (msg->twist).linear.y + (this->sum_lX_lY) * (msg->twist).angular.z) / this->r; 
+      controlMessage.rpm_rl = 60 * this->T * ((msg->twist).linear.x + (msg->twist).linear.y - (this->sum_lX_lY) * (msg->twist).angular.z) / this->r; 
 
       controlMessage.header.stamp.sec = (msg->header).stamp.sec;
       controlMessage.header.stamp.nsec = (msg->header).stamp.nsec; 
@@ -33,9 +33,8 @@ private:
   ros::Subscriber sub;
   ros::Publisher controlPublisher;
   int T = 5; 
-  float r = 0.078;
-  float lX = 0.2;
-  float lY = 0.15;
+  float r = 0.075;
+  float sum_lX_lY = 0.36;
 };
 
 int main(int argc, char **argv) {

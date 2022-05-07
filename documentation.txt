@@ -47,8 +47,8 @@ float64 old_y
 float64 old_theta
 
 How to start
-1) Put the folder Robotics-Project-1 into the folder "src" into the ROS workspace (in the course ~/robotics/src/);
-2) Remove the comment tags in the launch file according to the bag you want to run and comment the lines related to the other bags (default is bag1 set of parameters) (in our case the launch file path is ~/robotics/src/Robotics-Project-1/project1/launch/project1.launch);
+1) Move the folder "project1" from "10702339-10698469-10698193" to the folder "src" into the ROS workspace (in the course ~/robotics/src/);
+2) Remove the comment tags in the launch file according to the bag you want to run and comment the lines related to the other bags (default is bag1 set of parameters) (in our case the launch file path is ~/robotics/src/project1/launch/project1.launch);
 3) Open a terminal and move to your ROS workspace (in the course ~/robotics/);
 4) Execute "catkin_make";
 5) Execute "roslaunch project1 project1.launch".
@@ -57,10 +57,12 @@ To use the reset service execute "rosservice call reset new_x new_y new_theta" (
 To use dynamic reconfigure to change the integration method execute "rosrun rqt_reconfigure rqt_reconfigure" and insert the new value inside the window. Alternatively use "rosrun dynamic_reconfigure dynparam set /odometry_calculator method value" (value can be 0 or 1).
 
 Calibration steps
-1) Open a terminal and move to Robotics-Project-1 (for us ~/robotics/src/Robotics-Project-1);
-2) Execute "python3 calibrator_r_N" in order to calibrate parameters r and N. Execute "python3 calibrator_lX_lY" in order to calibrate parameter sum_lX_lY. The computation of parameters, which will be printed on stdout, requires a while.
+1) Move "calibrator_r_N.py" and "calibrator_l_w.py" from "10702339-10698469-10698193" to the ROS workspace (in the course ~/robotics/);
+2) Open a terminal and move to the ROS workspace (for us ~/robotics/);
+3) Execute "python3 calibrator_r_N.py" in order to calibrate parameters r and N. Execute "python3 calibrator_l_w.py" in order to calibrate parameter sum_lX_lY. The computation of parameters, which will be printed on stdout, requires a while.
 
 Important notes
 To calibrate the robot's parameters we decide to use a sort of brute-force approach. The python file executes multiple times the bags changing the robot parameters using dynamic reconfigure. For each set of parameters the calibration node computes a metric that evaluates the difference between our odometry and the real pose. The metric is printed on a text file from which the python file finds the minimum and displays the related parameters. We calibrate r and N using just the bag "bag1.bag" because there are only linear movements and no rotations in it, so l and w don't affect the motion. Then we calibrate l + w using just the bag "bag2.bag" in which there are rotations. We check the results, also using rviz, running the calibrated node with all provided bags.
-The nodes already use the parameters obtained from the calibration (N = 44,  r = 0.078, l + w = 0.35).
+The nodes already use the parameters obtained from the calibration (N = 41,  r = 0.075, l + w = 0.36).
+In the launch file we set the orientation of the initial pose and the static trasformation from world to odom to 0.0 rad, because the angle was very small probably due to noise. By doing this our odometry follows the real pose more accurately. To do one more check it is possible to modify the launch file setting the orientations to the given ones.
 The parameters l and w must be calibrated together because, in the formulas, they are always used as the sum l + w therefore there are multiple values that can fit the calibration.

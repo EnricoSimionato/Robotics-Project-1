@@ -6,7 +6,7 @@
 class VelocityCalculator {
 public:
   VelocityCalculator() { 
-    this->sub = n.subscribe("wheel_states", 1000, &VelocityCalculator::computeVelocityCallback, this); // mettere lo / in wheel_states?
+    this->sub = n.subscribe("wheel_states", 1000, &VelocityCalculator::computeVelocityCallback, this); 
     this->velocitiesPublisher = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
   }
 
@@ -18,7 +18,7 @@ public:
     
     if(!this->firstUse)
     {
-      // The first time initialize ticks and times
+      // The first call initializes ticks and times
       for(int i = 0; i < sizeof(this->ticks)/sizeof(float); i++)
         this->ticks[i] = msg->position[i];
 
@@ -51,29 +51,10 @@ public:
         this->v[1] = (this->r * ((float) (- wRuota[0] + wRuota[1] + wRuota[2] - wRuota[3]))) / 4.0;
         this->v[2] = 0.0;
         
-
-
         // Calculate the angular velocity w [rad/s]
         this->w[0] = 0.0;
         this->w[1] = 0.0;
-        this->w[2] = (this->r * ((float) (- wRuota[0] + wRuota[1] - wRuota[2] + wRuota[3]))) / (4.0 * (this->lX + this->lY));
-        
-        
-      /*  ROS_INFO("w ruota 1: %f", wRuota[0]);
-        ROS_INFO("w ruota 2: %f", wRuota[1]);
-        ROS_INFO("w ruota 3: %f", wRuota[2]);
-        ROS_INFO("w ruota 4: %f", wRuota[3]);*/
-        /*ROS_INFO("w ruota 1 reale: %f", msg->velocity[0] / (60 * this->T)); // in [rad/s]
-        ROS_INFO("w ruota 2 reale: %f", msg->velocity[1] / (60 * this->T));
-        ROS_INFO("w ruota 3 reale: %f", msg->velocity[2] / (60 * this->T));
-        ROS_INFO("w ruota 4 reale: %f", msg->velocity[3] / (60 * this->T));
-        */
-        /*//ROS_INFO("v in x: %f", this->v.x);
-        //ROS_INFO("v in y: %f", this->v.y);
-        //ROS_INFO("w in z: %f", this->w.z);
-        ROS_INFO("v in x: %f", this->v[0]);
-        ROS_INFO("v in y: %f", this->v[1]);
-        ROS_INFO("w in z: %f", this->w[2]);*/
+        this->w[2] = (this->r * ((float) (- wRuota[0] + wRuota[1] - wRuota[2] + wRuota[3]))) / (4.0 * (this->sum_lX_lY));
         
         // Update ticks and time
         for(int i = 0; i < sizeof(this->ticks)/sizeof(float); i++)
@@ -112,11 +93,10 @@ private:
   int times[2];
   float v[3];
   float w[3];
-  int N = 44; // encoder resolution
-  int T = 5; // gear ratio
-  float r = 0.078;
-  float lX = 0.2;
-  float lY = 0.15;
+  int N = 41; 
+  int T = 5; 
+  float r = 0.075;
+  float sum_lX_lY = 0.36;
   int counter = 0;
 };
 

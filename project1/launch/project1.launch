@@ -3,26 +3,26 @@
     <!-- bag1 -->
     <param name="initial_x" value="0.00815962441266" />
     <param name="initial_y" value="0.003059721319" />
-    <param name="initial_t" value="-0.038735" />
+    <param name="initial_t" value="0.0" />   
     <param name="initial_secs" value="1649348542" />
     <param name="initial_nsecs" value="208360780" />
-    <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.00815962441266 0.003059721319 0 -0.0115776332095 -0.0207516606897 -0.0195951275527  0.999525606632 world odom" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.00815962441266 0.003059721319 0 0 0 0 1 world odom" />
 
     <!-- bag2 -->
     <!-- <param name="initial_x" value="0.0242218170315" /> -->
     <!-- <param name="initial_y" value="0.00374252465554" /> -->
-    <!-- <param name="initial_t" value="-0.009419" /> -->
+    <!-- <param name="initial_t" value="0.0" /> -->
     <!-- <param name="initial_secs" value="1649348648" /> -->
     <!-- <param name="initial_nsecs" value="859687942" /> -->
-    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.0242218170315 0.00374252465554 0 0.0338488332927 -0.0555740334094 -0.00280516617931  0.997876763344 world odom" /> -->
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.0242218170315 0.00374252465554 0 0 0 0 1 world odom" /> -->
 
     <!-- bag3 -->
     <!-- <param name="initial_x" value="0.00546012399718" /> -->
     <!-- <param name="initial_y" value="0.0399703718722" /> -->
-    <!-- <param name="isnitial_t" value="-0.010877" /> -->
+    <!-- <param name="isnitial_t" value="0.0" /> -->
     <!-- <param name="initial_secs" value="1649348784" /> -->
     <!-- <param name="initial_nsecs" value="993775398" /> -->
-    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.00546012399718 0.0399703718722 0 -0.0105932056904 -0.0247681923211 -0.00675158947706  0.999614357948 world odom" /> -->
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom" output="screen" args="0.00546012399718 0.0399703718722 0 0 0 0 1 world odom" /> -->
  
     <node pkg="project1" type="velocities" name="velocities_calculator" output="screen"/>
     <node pkg="project1" type="odometry" name="odometry_calculator" output="screen"/>

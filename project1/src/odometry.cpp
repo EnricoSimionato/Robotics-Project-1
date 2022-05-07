@@ -15,7 +15,7 @@ class OdometryCalculator {
 public:
   OdometryCalculator() { 
     this->service = n.advertiseService<project1::Reset::Request, project1::Reset::Response>("reset", boost::bind(&OdometryCalculator::reset_callback, this, pose, _1, _2));
-    this->velocitiesSubcriber = n.subscribe("cmd_vel", 1000, &OdometryCalculator::computeOdometryCallback, this); // mettere lo / in wheel_states?
+    this->velocitiesSubcriber = n.subscribe("cmd_vel", 1000, &OdometryCalculator::computeOdometryCallback, this);
     this->odometryPublisher = n.advertise<nav_msgs::Odometry>("odom", 1000);   
   }
 
@@ -67,27 +67,14 @@ public:
         teta = atan((msg->twist).linear.y / (msg->twist).linear.x);
       else teta = atan((msg->twist).linear.y / (msg->twist).linear.x) + M_PI;
 
-      if(this->integrationMode == 0) {
-
+      if(this->integrationMode == 0) 
+      {
         this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta) * ts;
         this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta) * ts;
-        /*ROS_INFO("Euler method");  
-        ROS_INFO("position in x: %f", this->pose[0]);
-        ROS_INFO("position in x: %f", this->pose[0]);
-        ROS_INFO("position in y: %f", this->pose[1]);
-        ROS_INFO("orientation: %f", this->pose[2]);
-      */
-      } else if (this->integrationMode == 1) {
-
+      } else if (this->integrationMode == 1) 
+      {
         this->pose[0] = this->pose[0] + v * cos(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
         this->pose[1] = this->pose[1] + v * sin(this->pose[2] + teta + (msg->twist).angular.z * ts / 2) * ts;
-  /*
-        ROS_INFO("RK method");
-        ROS_INFO("position in x: %f", this->pose[0]);
-        ROS_INFO("position in x: %f", this->pose[0]);
-        ROS_INFO("position in y: %f", this->pose[1]);
-        ROS_INFO("orientation: %f", this->pose[2]);
-    */  
       } else {
         ROS_INFO("Error");
       }
@@ -104,7 +91,7 @@ public:
         
         // orientation
         tf2::Quaternion q;
-        q.setRPY(0, 0, this->pose[2]); //this should be in radians
+        q.setRPY(0, 0, this->pose[2]); 
         odometryMessage.pose.pose.orientation.x = q.x();
         odometryMessage.pose.pose.orientation.y = q.y();
         odometryMessage.pose.pose.orientation.z = q.z();
@@ -125,25 +112,6 @@ public:
         odometryMessage.child_frame_id = "base_link"; 
         odometryPublisher.publish(odometryMessage);   
 
-
-
-      /*  transformStamped.header.frame_id = "world"; 
-        transformStamped.child_frame_id = "odom"; 
-   
-        transformStamped.transform.translation.x = this->initialPose[0];
-        transformStamped.transform.translation.y = this->initialPose[1];
-        transformStamped.transform.translation.z = 0.0;
-      
-        tf2::Quaternion q1; 
-        q1.setRPY(0, 0, this->initialPose[2]);
-        transformStamped.transform.rotation.x = q1.x();
-        transformStamped.transform.rotation.y = q1.y();
-        transformStamped.transform.rotation.z = q1.z();
-        transformStamped.transform.rotation.w = q1.w();
-
-        br.sendTransform(transformStamped);*/
-
-
         transformStamped.header.frame_id = "odom"; 
         transformStamped.child_frame_id = "base_link"; 
    
@@ -159,7 +127,6 @@ public:
         transformStamped.transform.rotation.w = q1.w();
 
         br.sendTransform(transformStamped);   
-
     }
      
   }

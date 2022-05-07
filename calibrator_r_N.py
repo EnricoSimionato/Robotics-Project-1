@@ -7,8 +7,8 @@ minValue = 1000000.0
 counter = 0
 first = True
 os.system("gnome-terminal -e 'bash -c \" catkin_make; roslaunch project1 project1.launch\"'")
-for r in np.arange(0.073,0.08,0.001):
-	for n in np.arange(42,47,1):
+for r in np.arange(0.070,0.079,0.001):
+	for n in np.arange(37,45,1):
 		if first:
 			first = False
 			time.sleep(7)
@@ -39,8 +39,8 @@ f.readline()
 f.readline()
 f.readline()
 f.readline()
-for r in np.arange(0.073,0.08,0.001):
-	for n in np.arange(41,45,1):
+for r in np.arange(0.070,0.079,0.001):
+	for n in np.arange(37,45,1):
 		result = f.readline()
 		result1 = result[6:14]
 		try:	

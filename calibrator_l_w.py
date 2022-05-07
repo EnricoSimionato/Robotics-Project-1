@@ -10,9 +10,9 @@ first = True
 os.system("gnome-terminal -e 'bash -c \" catkin_make; roslaunch project1 project1.launch\"'")
 for sum_lX_lY in np.arange(0.345,0.363,0.001):
 	if first:
-		parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(43)
-		parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(0.078)
-		parameter3 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator bag " + str(0)
+		parameter1 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator N " + str(41)
+		parameter2 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator r " + str(0.075)
+		parameter3 = "rosrun dynamic_reconfigure dynparam set /calibration_calculator bag " + str(1)
 		os.system("gnome-terminal -e 'bash -c \"" + parameter1 + "\"'")
 		os.system("gnome-terminal -e 'bash -c \"" + parameter2 + "\"'")
 		os.system("gnome-terminal -e 'bash -c \"" + parameter3 + "\"'")
