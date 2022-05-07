@@ -14,18 +14,24 @@ Files description:
 - calibrator_r_N.py and calibrator_l_w.py : python file to calibrate the robot parameters.
 
 ROS parameters
-- method : odometry integration method. If set to 0 (Euler) the odometry calculator uses the Euler integration else if set to 1 (RK) the odometry calculator uses the Runge-Kutta method.
+
+- initial_x : initial robot position along x;
+- initial_y : initial robot position along y;
+- initial_t : initial robot orientation;
+- initial_secs : seconds of initial timestamp;
+- initial_nsecs : nanoseconds of initial timestamp;
+- method : odometry integration method. If set to 0 (Euler) the odometry calculator uses Euler integration else if set to 1 (RK) the odometry calculator uses Runge-Kutta method.
 The following parameters are used to calibrate the robot:
 - N : encoder resolution;
 - r : wheel radius;
 - sum_lX_lY : sum of wheel positioin along x (l) and along y (w);
-- bag : parameter to choose the calibration metric. If set to 0 the metric is the cartesian distance between the real robot's position and the one provided by the odometry else if set to 1 metric is the square difference between the real robot's orientation and the one provided by the odometry. 
+- bag : parameter to choose the calibration metric. If set to 0 the metric is the cartesian distance between the real robot's position and the one provided by the odometry, else if set to 1 the metric is the square difference between the real robot's orientation and the one provided by the odometry. 
 
 Structure of the TF tree
 The TF tree is composed by three frames: world, odom and base_link. These are standard reference frames.
 
 Structure of custom messages:
-- wheels_rpm.msg : it is used by the control node to publish the wheels' rpm. The structure is the following one:
+- wheels_rpm.msg : it is used by the control node to publish wheels' rpm. The structure is the following one:
 Header header
 float64 rpm_fl
 float64 rpm_fr
@@ -42,18 +48,19 @@ float64 old_theta
 
 How to start
 1) Put the folder Robotics-Project-1 into the folder "src" into the ROS workspace (in the course ~/robotics/src/);
-2) Open a terminal and move to your ROS workspace (in the course ~/robotics/);
-3) Execute "catkin_make";
-4) Execute "roslaunch project1 project1.launch".
+2) Remove the comment tags in the launch file according to the bag you want to run and comment the lines related to the other bags (default is bag1 set of parameters) (in our case the launch file path is ~/robotics/src/Robotics-Project-1/project1/launch/project1.launch);
+3) Open a terminal and move to your ROS workspace (in the course ~/robotics/);
+4) Execute "catkin_make";
+5) Execute "roslaunch project1 project1.launch".
 Now the nodes are running.
 To use the reset service execute "rosservice call reset new_x new_y new_theta" (new_x, new_y and new_theta represent the new pose of the robot).
-To use the dynamic reconfigure to change the integration method execute "rosrun rqt_reconfigure rqt_reconfigure" and insert the new value inside the window. Alternatively use "rosrun dynamic_reconfigure dynparam set /odometry_calculator method value" (value can be 0 or 1).
+To use dynamic reconfigure to change the integration method execute "rosrun rqt_reconfigure rqt_reconfigure" and insert the new value inside the window. Alternatively use "rosrun dynamic_reconfigure dynparam set /odometry_calculator method value" (value can be 0 or 1).
 
 Calibration steps
 1) Open a terminal and move to Robotics-Project-1 (for us ~/robotics/src/Robotics-Project-1);
 2) Execute "python3 calibrator_r_N" in order to calibrate parameters r and N. Execute "python3 calibrator_lX_lY" in order to calibrate parameter sum_lX_lY. The computation of parameters, which will be printed on stdout, requires a while.
 
 Important notes
-To calibrate the robot's parameters we decide to use a sort of brute-force approach. The python file executes multiple times the bags changing the robot parameters by dynamic reconfigure. For each set of parameters the calibration node computes a metric that evaluates the difference between our odometry and the real pose. The metric is printed on a text file from which the python file find the minimum and displays the related parameters. We calibrate r and N using just the bag "bag1.bag" because there are only linear movements and no rotation in it, so l and w don't affect the motion. Then we calibrate l + w using just the bag "bag2.bag" in which there are rotations. We check the results, also using rviz, running the calibrated node with all provided bags.
+To calibrate the robot's parameters we decide to use a sort of brute-force approach. The python file executes multiple times the bags changing the robot parameters using dynamic reconfigure. For each set of parameters the calibration node computes a metric that evaluates the difference between our odometry and the real pose. The metric is printed on a text file from which the python file finds the minimum and displays the related parameters. We calibrate r and N using just the bag "bag1.bag" because there are only linear movements and no rotations in it, so l and w don't affect the motion. Then we calibrate l + w using just the bag "bag2.bag" in which there are rotations. We check the results, also using rviz, running the calibrated node with all provided bags.
 The nodes already use the parameters obtained from the calibration (N = 44,  r = 0.078, l + w = 0.35).
 The parameters l and w must be calibrated together because, in the formulas, they are always used as the sum l + w therefore there are multiple values that can fit the calibration.
