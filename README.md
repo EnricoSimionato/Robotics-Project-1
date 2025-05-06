@@ -1,2 +1,7 @@
 # Robotics-Project-1
-Progetto di robotics, Bella ragaaaaaaaaaaaaaaaaaaaaaa
+
+
+## Contributors
+- Matteo Ronchetti
+- Alberto Sandri 
+- Enrico Simionato
